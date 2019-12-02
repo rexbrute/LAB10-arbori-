@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node
+{
+    int Key;
+    int Val;
+    int L;          // level
+    int BF;
+    int Height;         // balance factor
+    struct Node *Left, *Right;
+};
+
+ void SingleRotateWithLeft(T){
+;
+K1=K2->Left;
+K2->Left = K1->Right;
+K1->Right = K2;
+K2->Height = Max( Height (K2->Left),Height(K2->Right))+1;
+K1->Height = Max(Height(K1->Left), K2->Height) +1;
+return K1;
+}
+
+int Height(struct Node* p)
+{
+    int hl,hr;
+    hl=hr=0;
+    if(p)
+    {
+        if(p->Left)
+            hl = 1 + Height(p->Left);
+        if(p->Right)
+            hr = 1 + Height(p->Right);
+    }
+    return (hl>hr)?hl:hr;
+}
+
+struct Node *insert(int k, struct Node* T)
+{
+    if(T==NULL)
+    {
+        T = (struct Node*)malloc(sizeof(struct Node));
+        if(T==NULL)
+        {
+            printf("\n Eroare alocare Node!");
+            exit(1);
+        }
+        else
+        {
+            T->Key = k;
+            T->Height = 0;
+            T->Left = T->Right = NULL;
+        }
+    }
+    else if(k < T->Key)
+    {
+        T->Left = insert(k, T->Left);
+        if(Height(T->Left) - Height(T->Right) == 2)
+        {
+            if( k < T->Left->Key)
+                T= SingleRotateWithLeft(T);
+            else
+                T=DoubleRotateWithLeft ( T );
+        }
+    }
+    else if(k > T->Key){
+        T->Right = insert(k, T->Right);
+
+    if(Height(T->Right) - Height(T->Left) == 2)
+    {
+        if( k > T->Right->Key)
+            T= SingleRotateWithRight(T);
+        else
+            T=DoubleRotateWithRight(T);
+    }
+}
+// T->Height = Max(Height(T->Left),Height(T->Right))+1;
+return T;
+}
+
+
+
+void levelOrderTraversal(struct Node *T)
+{
+    struct Node *queue[100] = {(struct Node *)0}; // Important to initialize!
+    int size = 0;
+    int queue_pointer = 0;
+
+    while(T)
+    {
+        printf("%3d(%d)", T->Key, T->L);
+        if(T->Left)
+        {
+            queue[size++] = T->Left;
+        }
+
+        if(T->Right)
+        {
+            queue[size++] = T->Right;
+        }
+        T = queue[queue_pointer++];
+    }
+}
+
+
+void factor_echilibru(struct Node*);
+
+
+void preorder(struct Node* head, int level)
+{
+    if(head !=NULL)
+    {
+
+
+        printf("%3d",head->Key);
+        head->L = level;
+        factor_echilibru(head);
+        preorder(head->Left, level+1);
+        preorder(head->Right, level+1);
+    }
+}
+
+
+void drum(struct Node* p, int *max, int lung)
+{
+    if (p!=NULL)
+    {
+        drum(p->Right, max, lung+1);
+        if ((p->Left==NULL)&&(p->Right==NULL)&&(*max<lung))
+            *max=lung;
+        drum(p->Left, max, lung+1);
+    }
+}
+
+
+void factor_echilibru(struct Node *p)
+{
+    int hLeft,hRight;
+    hLeft = 1;
+    hRight= 1;
+
+    if(p->Left != NULL)
+        drum(p->Left, &hLeft, 1);
+    else
+        hLeft=0;
+
+    if(p->Right != NULL)
+        drum(p->Right, &hRight,1);
+    else
+        hRight = 0;
+
+    p->BF = hRight - hLeft;
+
+}
+
+
+
+
+
+
+
+int main(int argc, char *argv[])
+{
+
+    struct Node* tree = NULL;
+
+    tree = insert(54,tree);
+    tree = insert(85,tree);
+    tree = insert(28,tree);
+    tree = insert(32,tree);
+    tree = insert(14,tree);
+
+    printf("\n\ntraversare in preordine:\n");
+    // stabileste si nivelul fiecarui nod
+    // calculeaza si factorii de echilibrare
+    preorder(tree,0);
+
+    printf("\n\ntraversare pe niveluri:\n");
+    levelOrderTraversal(tree);
+
+
+    printf("\n\nnodul %d, BF = %2d", tree->Key, tree->BF);
+    printf("\nnodul %d, BF = %2d", tree->Right->Key, tree->Right->BF);
+
+    // tree=tree->Right->Right->Right;
+//   printf("\nnodul %d, BF = %2d", tree->Key, tree->BF);
+
+    //  printf("\n\n");
+
+    tree = insert(19,tree);
+
+    printf("\n\ntraversare in preordine:\n");
+    // stabileste si nivelul fiecarui nod
+    // calculeaza si factorii de echilibrare
+    preorder(tree,0);
+
+    printf("\n\ntraversare pe niveluri:\n");
+    levelOrderTraversal(tree);
+
+    tree = insert(21,tree);
+
+    printf("\n\ntraversare in preordine:\n");
+    // stabileste si nivelul fiecarui nod
+    // calculeaza si factorii de echilibrare
+    preorder(tree,0);
+
+    printf("\n\ntraversare pe niveluri:\n");
+    levelOrderTraversal(tree);
+
+
+
+
+    return 0;
+}
